@@ -6,6 +6,7 @@ import sys
 import termios
 import time
 import math
+import os
 
 class SerialPort(object):
   def __init__(self, tty_name):
@@ -20,7 +21,14 @@ class SerialPort(object):
       termios.tcsetattr(fd, termios.TCSAFLUSH, self.old_termios)
 
   def InitTTY(self):
-    self.tty = open(self.tty_name, 'rb+', 0)
+    #self.tty = open(self.tty_name, 'rb+', 0)
+
+    #fd = open("/dev/ttyUSB0", O_RDWR | O_NOCTTY | O_NONBLOCK);
+    #fcntl(fd, F_SETFL, 0);
+    ttyfd = os.open(self.tty_name, os.O_RDWR | os.O_NOCTTY | os.O_NONBLOCK)
+    fcntl.fcntl(ttyfd, fcntl.F_SETFL, 0)
+    self.tty = os.fdopen(ttyfd, 'rb+', 0)
+
     fd = self.tty.fileno()
 
     self.old_termios = termios.tcgetattr(fd)
