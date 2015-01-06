@@ -1,5 +1,13 @@
 #!/usr/bin/python
 
+# Allows camera to be controlled with PS3 controller.  Implements:
+# * Pan (analog sensitive)
+# * Tilt (analog sensitive)
+# * Zoom (analog sensitive)
+# * Focus (digital up/down buttons)
+# * O Button to toggle Auto Focus
+# * X Button to change sensitivity of pan/tilt
+
 import fcntl
 import struct
 import sys
