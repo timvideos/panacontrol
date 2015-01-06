@@ -10,11 +10,6 @@ import os
 import pygame
 from numpy import interp
 
-pygame.init()
-pygame.joystick.init()
-joystick = pygame.joystick.Joystick(0)
-joystick.init()
-
 class SerialPort(object):
   def __init__(self, tty_name):
     self.tty_name = tty_name
@@ -61,7 +56,6 @@ class SerialPort(object):
     return self.tty.write(byte)
     pass
 
-
 def main():
   input_buffer = []
 
@@ -71,6 +65,11 @@ def main():
     tty_name = '/dev/ttyS0'
 
   port = SerialPort(tty_name)
+
+  pygame.init()                                                                   
+  pygame.joystick.init()                                                          
+  joystick = pygame.joystick.Joystick(0)                                          
+  joystick.init() 
 
   panno = 50 
   tiltno = 50
@@ -136,11 +135,11 @@ def main():
             pass
 
     if joystick.get_button(4):
-        #if not focusno > 999:
+        if not focusno > 999:
             focusno = focusno + 10 
 
     if joystick.get_button(6):
-        #if not focusno < 1:
+        if not focusno < 1:
             focusno = focusno - 10
 
     print pan, tilt, zoom, focus, manualfocus
