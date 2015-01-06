@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-# Joystick (PS3) controller for Panasonic HE100E Camera
+# Joystick (PS3/Xbox) controller for Panasonic HE100E Camera
 # Ryan Verner <ryan.verner@gmail.com>
 #
 # Allows camera(s) to be controlled with PS3 controller.  Implements:
@@ -85,7 +85,7 @@ def main():
     tty_name = '/dev/ttyUSB0'
 
   try:
-    joystickno = sys.argv[2]
+    joystickno = int(sys.argv[2])
   except IndexError:
     joystickno = 0
 
