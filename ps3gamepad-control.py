@@ -81,84 +81,94 @@ def main():
     except IndexError:
         tty_name = '/dev/ttyUSB0'
 
-        try:
-            joystickno = int(sys.argv[2])
-        except IndexError:
-            joystickno = 0
+    try:
+        joystickno = int(sys.argv[2])
+    except IndexError:
+        joystickno = 0
 
-        port = SerialPort(tty_name)
-        pygame.init()                                                                   
-        pygame.joystick.init()                                                          
-        joystick = pygame.joystick.Joystick(joystickno)                                          
-        joystick.init() 
+    port = SerialPort(tty_name)
+    pygame.init()                                                                   
+    pygame.joystick.init()                                                          
+    joystick = pygame.joystick.Joystick(joystickno)                                          
+    joystick.init() 
 
-        panno = 50 
-        tiltno = 50
-        zoomno = 50
-        focusno = 50 # TODO: implement reading current focus, particularly after autofocus enabled
-        pantiltscale = 1
-        manualfocus = 0
+    panno = 50 
+    tiltno = 50
+    zoomno = 50
+    focusno = 50 # TODO: implement reading current focus, particularly after autofocus enabled
+    pantiltscale = 1
+    manualfocus = 0
+    vformatno = 2 # 720/50p
 
-        while True:
+    while True:
 
-            pan = '#P%02d' % panno
-            tilt = '#T%02d' % tiltno
-            zoom = '#Z%02d' % zoomno
-            focus = '#AYF%03d' % focusno
-            focustoggle = '#D1%01d' % manualfocus
+        pan = '#P%02d' % panno
+        tilt = '#T%02d' % tiltno
+        zoom = '#Z%02d' % zoomno
+        focus = '#AYF%03d' % focusno
+        focustoggle = '#D1%01d' % manualfocus
+        format = '#OSA:87:%01d' % vformatno 
 
-            for i in (pan, tilt, zoom):
-                port.WriteByte(i)
-                port.WriteByte('\r')
+        for i in (pan, tilt, zoom):
+            port.WriteByte(i)
+            port.WriteByte('\r')
 
-            if manualfocus == 1:
-                port.WriteByte(focus)
-                port.WriteByte('\r')
+        if manualfocus == 1:
+            port.WriteByte(focus)
+            port.WriteByte('\r')
 
-            time.sleep(0.1)
-            pygame.event.pump()
+        time.sleep(0.1)
+        pygame.event.wait()
 
-            def ConvRange(value, reverse=False, scale=1):
-                if reverse == True:
-                    camerarange = [99, 1]
-                else:
-                    camerarange = [1, 99]
-                joystickrange = [-1, 1]
-                return interp(value*scale, joystickrange, camerarange)
+        def ConvRange(value, reverse=False, scale=1):
+            if reverse == True:
+                camerarange = [99, 1]
+            else:
+                camerarange = [1, 99]
+            joystickrange = [-1, 1]
+            return interp(value*scale, joystickrange, camerarange)
 
-            panno = ConvRange(joystick.get_axis(0), scale=pantiltscale)
-            tiltno = ConvRange(joystick.get_axis(1), reverse=True, scale=0.75*pantiltscale)  
-            zoomno = ConvRange(joystick.get_axis(3), reverse=True)
+        panno = ConvRange(joystick.get_axis(0), scale=pantiltscale)
+        tiltno = ConvRange(joystick.get_axis(1), reverse=True, scale=0.75*pantiltscale)  
+        zoomno = ConvRange(joystick.get_axis(3), reverse=True)
 
-            if joystick.get_button(14):
-                if pantiltscale == 1:
-                    pantiltscale = 0.65
-                elif pantiltscale == 0.65:
-                    pantiltscale = 0.35
-                elif pantiltscale == 0.35:
-                    pantiltscale = 1 
-                    while joystick.get_button(14) == 1: 
-                        pygame.event.pump()
-
-            if joystick.get_button(13):
-                if manualfocus == 1:
-                    manualfocus = 0
-                else:
-                    manualfocus = 1
-                port.WriteByte(focustoggle)
-                port.WriteByte('\r')
-                while joystick.get_button(13) == 1:
+        if joystick.get_button(14):
+            if pantiltscale == 1:
+                pantiltscale = 0.65
+            elif pantiltscale == 0.65:
+                pantiltscale = 0.35
+            elif pantiltscale == 0.35:
+                pantiltscale = 1 
+                while joystick.get_button(14) == 1: 
                     pygame.event.pump()
 
-            if joystick.get_button(4):
-                if not focusno > 999:
-                    focusno = focusno + 10 
+        if joystick.get_button(13):
+            if manualfocus == 1:
+                manualfocus = 0
+            else:
+                manualfocus = 1
+            port.WriteByte(focustoggle)
+            port.WriteByte('\r')
+            while joystick.get_button(13) == 1:
+                pygame.event.pump()
 
-            if joystick.get_button(6):
-                if not focusno < 1:
-                    focusno = focusno - 10
+        if joystick.get_button(12):
+            if vformatno == 2:
+                vformatno = 5 #1080/50i
+            else:
+                vformatno = 2
+            port.WriteByte(vformat)
+            port.WriteByte('\r')
 
-            print pan, tilt, zoom, focus, manualfocus
+        if joystick.get_button(4):
+            if not focusno > 999:
+                focusno = focusno + 10 
+
+        if joystick.get_button(6):
+            if not focusno < 1:
+                focusno = focusno - 10
+
+        print pan, tilt, zoom, focus, manualfocus
 
 if __name__ == '__main__':
     main()
