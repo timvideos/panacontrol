@@ -98,7 +98,8 @@ def main():
     focusno = 50 # TODO: implement reading current focus, particularly after autofocus enabled
     pantiltscale = 1
     manualfocus = 0
-    vformatno = 2 # 720/50p
+    #vformatno = 2 # 720/50p
+    vformatno = 0 # 720/60p
 
     while True:
 
@@ -107,7 +108,7 @@ def main():
         zoom = '#Z%02d' % zoomno
         focus = '#AYF%03d' % focusno
         focustoggle = '#D1%01d' % manualfocus
-        format = '#OSA:87:%01d' % vformatno 
+        vformat = '#OSA:87:%01d' % vformatno 
 
         for i in (pan, tilt, zoom):
             port.WriteByte(i)
@@ -143,6 +144,7 @@ def main():
                     pygame.event.pump()
 
         if joystick.get_button(13):
+            print "Focus Toggle"
             if manualfocus == 1:
                 manualfocus = 0
             else:
@@ -153,10 +155,11 @@ def main():
                 pygame.event.pump()
 
         if joystick.get_button(12):
+            print "Changing format"
             if vformatno == 2:
                 vformatno = 5 #1080/50i
             else:
-                vformatno = 2
+                vformatno = 0
             port.WriteByte(vformat)
             port.WriteByte('\r')
 
